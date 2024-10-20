@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chat App</title>
+    <!-- Link para o arquivo de CSS -->
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+  <body>
+    <!-- Contêiner principal do chat -->
+    <div class="chat-container">
+      <!-- Seção onde as mensagens vão aparecer -->
+      <div id="chat-window" class="chat-window">
+        <!-- Mensagens serão injetadas aqui via JavaScript -->
+      </div>
+
+      <!-- Campo para exibir status, como "Procurando outro usuário..." -->
+      <div id="status" class="status">
+        Clique em "Procurar" para iniciar o chat!
+      </div>
+
+      <!-- Controles do chat -->
+      <div class="controls">
+        <!-- Input de mensagem do usuário -->
+        <input
+          type="text"
+          id="message-input"
+          placeholder="Digite sua mensagem..."
+          disabled
+        />
+
+        <!-- Botão para enviar a mensagem -->
+        <button id="send-button" disabled>Enviar</button>
+
+        <!-- Botão para iniciar a procura por outro usuário -->
+        <button id="search-button">Procurar outro usuário</button>
+      </div>
+    </div>
+
+    <!-- Adicionando o script do Socket.IO antes do chat.js -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="js/chat.js"></script>
+  </body>
+</html>

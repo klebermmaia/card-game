@@ -1,0 +1,94 @@
+/* Definições básicas para reset de margens e paddings */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Definição do estilo geral do body */
+body {
+  font-family: Arial, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #f0f0f0;
+}
+
+/* Contêiner principal do chat */
+.chat-container {
+  width: 400px;
+  max-width: 100%;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Janela onde as mensagens aparecerão */
+.chat-window {
+  flex-grow: 1;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 10px;
+  margin-bottom: 10px;
+  height: 300px;
+  overflow-y: auto; /* Para rolar mensagens quando o espaço acabar */
+  background-color: #f9f9f9;
+}
+
+/* Seção de status */
+.status {
+  text-align: center;
+  font-size: 14px;
+  color: #888;
+  margin-bottom: 10px;
+}
+
+/* Controles do chat */
+.controls {
+  display: flex;
+  gap: 10px;
+}
+
+/* Input de mensagem */
+#message-input {
+  flex-grow: 1;
+  padding: 10px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+  font-size: 14px;
+}
+
+/* Botão de enviar mensagem */
+#send-button {
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+#send-button:disabled {
+  background-color: #aaa;
+  cursor: not-allowed;
+}
+
+/* Botão de procurar outro usuário */
+#search-button {
+  padding: 10px 20px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+#search-button:disabled {
+  background-color: #aaa;
+  cursor: not-allowed;
+}
+
