@@ -1,51 +1,53 @@
-const socket = io();  // Conexão com o servidor via Socket.IO
-const searchButton =document.getElementById('search-button')
-const chatDisplay =document.getElementById('chat-window')
-const statusDisplay =document.getElementById('status')
-const messageInput = document.getElementById('message-input')
-const sendButton = document.getElementById('send-button')
+const socket = io();
+const searchButton = document.getElementById('search-button');
+const chatDisplay = document.getElementById('chat-window');
+const statusDisplay = document.getElementById('status');
+const messageInput = document.getElementById('message-input');
+const sendButton = document.getElementById('send-button');
+const usernameInput = document.getElementById('username-input'); // Campo de nome
 
-let partnerId = null;  // ID do parceiro conectado
+let partnerId = null;
 let isConnected = false;
+let username = "";
 
-// Ao clicar no botão "Procurar usuário"
+// Evento para iniciar busca por outro usuário
 searchButton.addEventListener('click', () => {
-  socket.emit('searchingForUser');  // Envia ao servidor que o usuário está procurando um par
+  username = usernameInput.value.trim();
+  if (!username) {
+    alert("Por favor, insira seu nome.");
+    return;
+  }
+
+  socket.emit('searchingForUser', username); // Envia o nome ao servidor
   statusDisplay.innerText = "Procurando outro usuário...";
   searchButton.disabled = true;
 });
 
-// Quando o usuário é colocado na fila de espera
-socket.on('waitingForUser', () => {
-  statusDisplay.innerText = "Aguardando outro usuário...";
-});
-
-// Quando um par é encontrado
-socket.on('userFound', (id) => {
+// Evento disparado quando um par é encontrado
+socket.on('userFound', ({ partnerId: id, partnerName }) => {
   partnerId = id;
-  statusDisplay.innerText = "Conectado a outro usuário!";
+  statusDisplay.innerText = `Conectado a ${partnerName}!`;
   isConnected = true;
 
-  // Habilita o input de mensagens e o botão de envio
   messageInput.disabled = false;
   sendButton.disabled = false;
-
-  // Função para enviar mensagem
-  sendButton.addEventListener('click', () => {
-    const message = messageInput.value.trim();
-    if (message !== '') {
-      appendMessage("Você", message);  // Exibe a mensagem enviada no chat
-      socket.emit('sendMessage', message);  // Envia a mensagem ao servidor
-      messageInput.value = '';  // Limpa o campo de input
-    } else {
-      console.log("Mensagem vazia não enviada.");  // Adicione esta linha
-  }
-  });
 });
 
-// Quando recebe uma mensagem do outro usuário
-socket.on('receiveMessage', (message) => {
-  appendMessage("Outro Usuário", message);  // Exibe a mensagem recebida no chat
+// Envia a mensagem apenas se conectado e a mensagem não estiver vazia
+sendButton.addEventListener('click', () => {
+  if (!isConnected) return; // Só envia se estiver conectado
+
+  const message = messageInput.value.trim();
+  if (message !== '') {
+    appendMessage("Você", message);  // Exibe a mensagem enviada no chat
+    socket.emit('sendMessage', { message });  // Envia a mensagem ao servidor
+    messageInput.value = '';  // Limpa o campo de input
+  }
+});
+
+// Recebe a mensagem do parceiro
+socket.on('receiveMessage', ({ message, sender }) => {
+  appendMessage(sender, message);
 });
 
 // Quando o parceiro se desconecta
@@ -54,9 +56,7 @@ socket.on('partnerDisconnected', () => {
   messageInput.disabled = true;
   sendButton.disabled = true;
   isConnected = false;
-
-  // O usuário volta a procurar outro usuário
-  socket.emit('searchingForUser');
+  socket.emit('searchingForUser', username); // Retorna à fila de espera
 });
 
 // Função para exibir mensagens no chat
@@ -65,3 +65,7 @@ function appendMessage(sender, message) {
   messageElement.textContent = `${sender}: ${message}`;
   chatDisplay.appendChild(messageElement);
 }
+
+socket.on('teste',(t)=>{
+  console.log(t)
+})

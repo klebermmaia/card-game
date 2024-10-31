@@ -3,71 +3,70 @@ const http = require('http');
 const { Server } = require('socket.io');
 const path = require('path');
 
-// Cria a aplicação Express
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-// Define a pasta pública para servir os arquivos HTML/CSS/JS
 app.use(express.static(path.join(__dirname, '../public')));
 
-// Variável para armazenar usuários à espera de um parceiro
-let waitingUser = null;
+let waitingUsers = [];
+let userNames = {}; // Armazena os nomes dos usuários associados aos IDs de socket
 
-// Armazena os pares de usuários conectados
-const connectedPairs = {};
-
-// Quando um usuário se conecta
 io.on('connection', (socket) => {
-    console.log(`Usuário conectado: ${socket.id}`);
+  console.log(`Usuário conectado: ${socket.id}`);
 
-    // Quando o usuário clica para buscar outro usuário
-    socket.on('searchingForUser', () => {
-        if (waitingUser) {
-          console.log(`Pareando ${socket.id} com ${waitingUser}`);
-            // Se houver um usuário esperando, pareia os dois
-            io.to(socket.id).emit('userFound', waitingUser);  // Informa o novo usuário sobre o par
-            io.to(waitingUser).emit('userFound', socket.id);  // Informa o usuário à espera
-            connectedPairs[socket.id] = waitingUser;  // Armazena os dois usuários pareados
-            connectedPairs[waitingUser] = socket.id;  // Armazena o par
-            waitingUser = null;  // Zera a variável, pois ambos foram pareados
-        } else {
-            // Se não houver ninguém esperando, o usuário fica à espera
-            waitingUser = socket.id;
-            socket.emit('waitingForUser');  // Informa que está na fila de espera
-        }
-    });
+  socket.on('searchingForUser', (username) => {
+    socket.emit('teste', username)
+    userNames[socket.id] = username; // Associa o nome do usuário ao socket.id
+    waitingUsers.push(socket.id); // Adiciona o usuário à fila
 
-    // Quando o usuário envia uma mensagem
-    socket.on('sendMessage', (message) => {
-        const partnerId = connectedPairs[socket.id];
-        if (partnerId) {
-            io.to(partnerId).emit('receiveMessage', message);  // Envia a mensagem ao parceiro
-        } else {
-          console.log(`Nenhum parceiro encontrado para ${socket.id}`);  // Adicione esta linha
+    // Verifica se há um par para formar uma sala
+    if (waitingUsers.length >= 2) {
+      const user1 = waitingUsers.shift();
+      const user2 = waitingUsers.shift();
+
+      const roomId = `${user1}_${user2}`;
+      io.to(user1).socketsJoin(roomId);
+      io.to(user2).socketsJoin(roomId);
+
+      // Envia confirmação de conexão e informações sobre o par
+      io.to(user1).emit('userFound', { partnerId: user2, partnerName: userNames[user2] });
+      io.to(user2).emit('userFound', { partnerId: user1, partnerName: userNames[user1] });
+    } else {
+      socket.emit('waitingForUser'); // Informa que está na fila de espera
+    }
+  });
+
+  socket.on('sendMessage', ({ message }) => {
+    const rooms = Array.from(socket.rooms);
+    const roomId = rooms.find(room => room !== socket.id);
+    
+    if (roomId) {
+      io.to(roomId).emit('receiveMessage', {
+        message,
+        sender: userNames[socket.id] || "Usuário"
+      });
+    }
+  });
+
+  socket.on('disconnect', () => {
+    console.log(`Usuário desconectado: ${socket.id}`);
+    delete userNames[socket.id]; // Remove o nome do usuário
+
+    // Remove o usuário da fila de espera, se estiver lá
+    waitingUsers = waitingUsers.filter(id => id !== socket.id);
+
+    // Notifica outros usuários na sala e libera a sala
+    const rooms = Array.from(socket.rooms);
+    rooms.forEach(roomId => {
+      if (roomId !== socket.id) {
+        io.to(roomId).emit('partnerDisconnected'); // Informa ao parceiro que o outro usuário saiu
+        socket.to(roomId).leave(roomId); // Remove o socket da sala
       }
     });
-
-    // Quando o usuário se desconecta
-    socket.on('disconnect', () => {
-        console.log(`Usuário desconectado: ${socket.id}`);
-        const partnerId = connectedPairs[socket.id];
-
-        if (partnerId) {
-            io.to(partnerId).emit('partnerDisconnected');  // Informa o parceiro que o outro desconectou
-            delete connectedPairs[partnerId];  // Remove o par do parceiro desconectado
-            waitingUser = partnerId;  // Coloca o parceiro na fila de espera
-        }
-
-        delete connectedPairs[socket.id];  // Remove o par do usuário desconectado
-
-        if (waitingUser === socket.id) {
-            waitingUser = null;  // Limpa a fila de espera se o usuário que estava aguardando sair
-        }
-    });
+  });
 });
 
-// Configura o servidor para ouvir na porta 3000
 server.listen(3000, () => {
-    console.log('Servidor rodando na porta 3000');
+  console.log('Servidor rodando na porta 3000');
 });
