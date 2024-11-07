@@ -1,3 +1,9 @@
+/*
+------ Para Fazer -------
+Validador de nickname, para remover espaços, simboloes e etc.
+
+*/
+
 const socket = io();
 const searchButton = document.getElementById('search-button');
 const chatDisplay = document.getElementById('chat-window');
@@ -6,22 +12,40 @@ const messageInput = document.getElementById('message-input');
 const sendButton = document.getElementById('send-button');
 const usernameInput = document.getElementById('username-input'); // Campo de nome
 
+const starGame = document.getElementById('StarGame');
+const nicknameInput = document.getElementById('nickname');
+
+const testes = document.querySelector('.testes');
+
 let partnerId = null;
 let isConnected = false;
 let username = "";
 
 // Evento para iniciar busca por outro usuário
-searchButton.addEventListener('click', () => {
-  username = usernameInput.value.trim();
-  if (!username) {
-    alert("Por favor, insira seu nome.");
-    return;
+starGame.addEventListener('click', () =>{
+  let nickname = nicknameInput.value.trim();
+  // console.log(nickname)
+  if(!nickname){
+    alert("Por favor insira um nickname.", nickname)
+    return
   }
+  
+  socket.emit('searchingForOpponent', nickname); // Envia o Nick para o server
+  testes.innerText = ''
+  starGame.disabled = true;
+})
 
-  socket.emit('searchingForUser', username); // Envia o nome ao servidor
-  statusDisplay.innerText = "Procurando outro usuário...";
-  searchButton.disabled = true;
-});
+// searchButton.addEventListener('click', () => {
+//   username = usernameInput.value.trim();
+//   if (!username) {
+//     alert("Por favor, insira seu nome.");
+//     return;
+//   }
+
+//   socket.emit('searchingForUser', username); // Envia o nome ao servidor
+//   statusDisplay.innerText = "Procurando outro usuário...";
+//   searchButton.disabled = true;
+// });
 
 // Evento disparado quando um par é encontrado
 socket.on('userFound', ({ partnerId: id, partnerName }) => {
@@ -34,16 +58,16 @@ socket.on('userFound', ({ partnerId: id, partnerName }) => {
 });
 
 // Envia a mensagem apenas se conectado e a mensagem não estiver vazia
-sendButton.addEventListener('click', () => {
-  if (!isConnected) return; // Só envia se estiver conectado
+// sendButton.addEventListener('click', () => {
+//   if (!isConnected) return; // Só envia se estiver conectado
 
-  const message = messageInput.value.trim();
-  if (message !== '') {
-    appendMessage("Você", message);  // Exibe a mensagem enviada no chat
-    socket.emit('sendMessage', { message });  // Envia a mensagem ao servidor
-    messageInput.value = '';  // Limpa o campo de input
-  }
-});
+//   const message = messageInput.value.trim();
+//   if (message !== '') {
+//     appendMessage("Você", message);  // Exibe a mensagem enviada no chat
+//     socket.emit('sendMessage', { message });  // Envia a mensagem ao servidor
+//     messageInput.value = '';  // Limpa o campo de input
+//   }
+// });
 
 // Recebe a mensagem do parceiro
 socket.on('receiveMessage', ({ message, sender }) => {
