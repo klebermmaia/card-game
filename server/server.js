@@ -19,39 +19,43 @@ io.on("connection", (socket) => {
   socket.on("searchingForOpponent", (userName) => {
     // console.log('userName')
     // socket.emit("teste", userNames);
+    let confirmaJogo = false;
+    socket.emit('confirmaJogo', ()=>{
+
+    })
+
+    function checkJogador (){
+      
+    }
+
 
     waitingPlayers.push({ id: socket.id, username: userName }); // Adiciona o usuário à fila
     console.log(`${userName} entrou na fila de espera`);
     userNames[socket.id] = userName; // Associa o nome do usuário ao socket.id
-
+    
     // Verifica se há jogadores suficientes na fila para criar uma partida
-    if (waitingPlayers.length >= 2) {
-      criarParDeJogadores();
-    }
-    function criarParDeJogadores() {
-      // Remove os dois primeiros jogadores da fila
-      const p1 = waitingPlayers.shift();
-      const p2 = waitingPlayers.shift();
-
-      // Nome da sala baseado nos IDs dos jogadores
-      const roomName = `room-${p1.id}-${p2.id}`;
-      console.log(`Sala criada com ${userNames[p1.id]} e ${userNames[p2.id]}`)
-      socket.emit("teste", roomName);
-
-    }
+    if (waitingPlayers.length >= 2) criarParDeJogadores()
+      
+      socket.emit('toggleBtnCancelGame', true);
+      // socket.on('toggleBtnCancelGame');
   });
 
-  socket.on("sendMessage", ({ message }) => {
-    const rooms = Array.from(socket.rooms);
-    const roomId = rooms.find((room) => room !== socket.id);
+  function criarParDeJogadores() {
+    // Remove os dois primeiros jogadores da fila
+    const p1 = waitingPlayers.shift();
+    const p2 = waitingPlayers.shift();
 
-    if (roomId) {
-      io.to(roomId).emit("receiveMessage", {
-        message,
-        sender: userNames[socket.id] || "Usuário",
-      });
-    }
-  });
+    // Nome da sala baseado nos IDs dos jogadores
+    const roomName = `room-${p1.id}-${p2.id}`;
+    console.log(`Sala criada com ${userNames[p1.id]} e ${userNames[p2.id]}`)
+    console.log(waitingPlayers);
+    socket.emit("teste", waitingPlayers);
+    
+  }
+  // Cancelar busca por oponente
+  // socket.on('cancelarProcuraPorPlayer', ()=>{
+  // });
+
 
   socket.on("disconnect", () => {
     console.log(`Usuário desconectado: ${socket.id}`);
@@ -69,6 +73,7 @@ io.on("connection", (socket) => {
       }
     });
   });
+
 });
 
 server.listen(3000, () => {
