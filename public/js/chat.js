@@ -28,12 +28,22 @@ btnStarGame.addEventListener("click", () => {
   btnStarGame.disabled = true;
 });
 
-// Cancela busca por oponente 
-btnCancelGame.addEventListener("click", ()=>{
-  btnStarGame.classList.romeve("disable");
-  btnCancelGame.classList.reomve("active");
-
-  socket.emit('cancelarProcuraPorPlayer', true);
+socket.on('confirmaJogo', ()=>{
+  const displaycheck = document.querySelector('.displaycheck');
+  const btnConfirme = document.querySelector('#btnConfirme');
+  const btnRecursa = document.querySelector('#btnRecursa');
+  
+  [btnConfirme, btnRecursa].forEach((btn) => {
+    const checkbox = document.querySelector(`#${btn.id}`);
+    if (checkbox.checked) {
+      console.log(`O botão ${btn.id} está marcado`);
+    }
+    else{
+      console.log(':(');
+    }
+  });
+  
+  displaycheck.style.display = 'flex';
 });
 
 // Desativa botão de busca e ativa o de cancelar
@@ -41,11 +51,6 @@ socket.on("toggleBtnCancelGame", (check) => {
   btnStarGame.classList.add("disable");
   btnCancelGame.classList.add("active");
 });
-socket.on('checkJogador', (t)=>{
-  console.log(t)
-})
-
-// function cancelSearchingForOpponent() {}
 
 // Evento disparado quando um par é encontrado
 socket.on("userFound", ({ partnerId: id, partnerName }) => {

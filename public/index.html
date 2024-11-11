@@ -9,7 +9,7 @@
   </head>
   <body>
 
-    <div class="teste">
+    <div>
       <h1>Desígnio</h1>
     </div>
     <form>
@@ -19,9 +19,34 @@
       <button type="button" id="btnStarGame" class="btn btnStarGame">Jogar</button>
       <button type="button" id="btnCancelGame" class="btn btnCancelGame">Cancelar</button>
     </form>
+
+    <div class="displaycheck">
+      <div class="boxTime">
+        <div class="meia-lua"></div>
+      </div>
+      <div class="btns">
+        <label for="btnConfirme" class="labelCheck btn">Confirma</label>
+        <input type="checkbox" name="btnConfirme" id="btnConfirme" class="displayNone">
+
+        <label for="btnRecursa" class="labelCheck btn">Recusar</label>
+        <input type="checkbox" name="btnRecursa" id="btnRecursa" class="displayNone">
+        
+        <!-- <button type="button" class="btn btnConfirme">Confirma</button>
+        <button type="button" class="btn btnRecursa">Recusar</button> -->
+      </div>
+    </div>
+
     <p class="testes"></p>
     <!-- Adicionando o script do Socket.IO antes do chat.js -->
     <script src="/socket.io/socket.io.js"></script>
     <script src="js/chat.js"></script>
+    <!-- <script>
+
+      const btnRecursa = document.getElementById('btnRecursa');
+
+      btnRecursa.addEventListener('click',()=>{
+        console.log('Pegando')
+      })
+    </script> -->
   </body>
 </html>

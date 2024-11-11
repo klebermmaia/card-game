@@ -19,25 +19,19 @@ io.on("connection", (socket) => {
   socket.on("searchingForOpponent", (userName) => {
     // console.log('userName')
     // socket.emit("teste", userNames);
-    let confirmaJogo = false;
-    socket.emit('confirmaJogo', ()=>{
-
-    })
-
-    function checkJogador (){
-      
-    }
-
 
     waitingPlayers.push({ id: socket.id, username: userName }); // Adiciona o usuário à fila
     console.log(`${userName} entrou na fila de espera`);
     userNames[socket.id] = userName; // Associa o nome do usuário ao socket.id
     
     // Verifica se há jogadores suficientes na fila para criar uma partida
-    if (waitingPlayers.length >= 2) criarParDeJogadores()
+    if (waitingPlayers.length >= 2) {
+      let confirmaJogo
+      io.emit('confirmaJogo', (check)=>{
+        if(check) criarParDeJogadores();
+      })
+    }
       
-      socket.emit('toggleBtnCancelGame', true);
-      // socket.on('toggleBtnCancelGame');
   });
 
   function criarParDeJogadores() {
@@ -52,9 +46,6 @@ io.on("connection", (socket) => {
     socket.emit("teste", waitingPlayers);
     
   }
-  // Cancelar busca por oponente
-  // socket.on('cancelarProcuraPorPlayer', ()=>{
-  // });
 
 
   socket.on("disconnect", () => {
